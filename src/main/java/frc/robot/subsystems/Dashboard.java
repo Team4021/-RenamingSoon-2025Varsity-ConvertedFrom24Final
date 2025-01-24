@@ -12,7 +12,7 @@ public class Dashboard extends SubsystemBase{
     }
     
     public void pushToDashboard(){
-        SmartDashboard.putBoolean("Note In Intake", m_limitSwitch.get());
+        SmartDashboard.putBoolean("Piece In Intake", m_limitSwitch.get());
         
     }
 }

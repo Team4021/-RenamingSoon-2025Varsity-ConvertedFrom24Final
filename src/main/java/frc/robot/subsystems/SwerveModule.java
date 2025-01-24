@@ -27,6 +27,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 
 import frc.robot.Constants.ModuleConstants;
 
+
 public class SwerveModule {
   private final SparkMax m_drivingSparkMax;
   private final SparkMax m_turningSparkMax;
