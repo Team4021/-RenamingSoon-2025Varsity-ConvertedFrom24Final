@@ -9,11 +9,13 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.Kinematics;
 //import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.constraint.SwerveDriveKinematicsConstraint;
 import edu.wpi.first.units.measure.AngularVelocity;
 //import edu.wpi.first.math.util.Units;
 //import edu.wpi.first.units.measure.Distance;
@@ -39,6 +41,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
+import frc.robot.Constants;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create SwerveModules
@@ -112,12 +116,17 @@ public class DriveSubsystem extends SubsystemBase {
       });
 
       
+      public void resetPose(Pose2d pose) {
+        System.out.println(pose);
+        m_odometry.resetPosition(m_gyro.getRotation2d(), getPose(), pose);
+
+        
+      m_odometry = new SwerveDriveOdometry(SwerveDriveKinematics, m_gyro.getRotation2d(), getPose());
       
-      public class DriveSubsystemInner extends DriveSubsystem {  //this line seems fine
+      
         // All other subsystem initialization
-        public void resetPose(Pose2d pose) {
+        
           // Your logic to reset the pose (odometry, etc.)
-    
         // Load the RobotConfig from the GUI settings. You should probably
         // store this in your Constants file
 
@@ -128,14 +137,23 @@ public class DriveSubsystem extends SubsystemBase {
         } catch (Exception e) {
           // Handle exception as needed
           e.printStackTrace();
-        }
-    
+        }}
+        //Defining?
+
+        
+
+
+        // The robot is moving at 3 meters per second forward, 2 meters
+// per second to the right, and rotating at half a rotation per
+// second counterclockwise.
+
+
         // Configure AutoBuilder last
         AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
                 this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+                this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                this::driveChassis, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
                 new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                         new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
                         new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
@@ -155,7 +173,9 @@ public class DriveSubsystem extends SubsystemBase {
                 this // Reference to this subsystem to set requirements
         );
         }
-      }}
+      
+
+      
 
         // AutoBuilder.configureHolonomic(
         //     this::getPose, // Robot pose supplier
@@ -310,7 +330,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_rearRight.setDesiredState(swerveModuleStates[2]);
   }
 
-  // public void headingDrive(double xSpeed, double ySpeed, double desiredAngle, boolean fieldRelative) {
+   public void headingDrive(double xSpeed, double ySpeed, double desiredAngle, boolean fieldRelative) {
   //   double currentAngle = Math.abs(this.m_gyro.getYaw().getValueAsDouble() % 360);
   //   SmartDashboard.putNumber("currentAngle", currentAngle);
   //   SmartDashboard.putNumber("gyroangle", m_gyro.getYaw().getValueAsDouble());
@@ -344,14 +364,14 @@ public class DriveSubsystem extends SubsystemBase {
   //   // Calculate theta difference between current and desired
   //   double desiredAngle = Math.atan2(-yRotation, xRotation);
 
-  //   if (Math.abs(xRotation) < OIConstants.kJoystickDeadband && Math.abs(yRotation) < OIConstants.kJoystickDeadband) {
+  //if (Math.abs(xRotation) < OIConstants.kJoystickDeadband && Math.abs(yRotation) < OIConstants.kJoystickDeadband) {
   //     this.drive(xSpeed, ySpeed, 0.0, true, true);
   //     return;
   //   };
 
   //   //Send the drive speed to the main drive method
   //   this.headingDrive(xSpeed, ySpeed, desiredAngle, true);
-  // }
+   }
 
 
   /**
